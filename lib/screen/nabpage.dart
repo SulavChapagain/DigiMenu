@@ -1,3 +1,4 @@
+import 'package:digimenu/screen/about.dart';
 import 'package:digimenu/screen/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,13 @@ class _HomeNabvarState extends State<HomeNabvar> {
               return CupertinoTabView(
                 builder: (context) {
                   return const CupertinoPageScaffold(child: HomePage());
+                },
+              );
+
+            case 2:
+              return CupertinoTabView(
+                builder: (context) {
+                  return const CupertinoPageScaffold(child: AboutPage());
                 },
               );
           }

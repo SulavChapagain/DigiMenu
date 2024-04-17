@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
         child: Scaffold(
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
-        backgroundColor: Color.fromARGB(255, 4, 65, 100),
+        backgroundColor: const Color.fromARGB(255, 20, 111, 185),
         tooltip: 'Increment',
         onPressed: () {},
         child: const Icon(Icons.add, color: Colors.white, size: 28),
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                       return ListTile(
                         title:
                             Text(searchResults[index]["heading"].toUpperCase()),
-                        trailing: Icon(Icons.arrow_right_outlined),
+                        trailing: const Icon(Icons.arrow_right_outlined),
                         onTap: () {
                           Navigator.push(
                               context,
