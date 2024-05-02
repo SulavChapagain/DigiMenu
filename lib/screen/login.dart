@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        "Welcome to FinoMenu",
+                        "Welcome to DigiMenu",
                         style: TextStyle(
                             fontSize: 22, fontWeight: FontWeight.w700),
                       )
@@ -116,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Join FinoMenu? ",
+                      "Join DigiMenu? ",
                       style: TextStyle(fontSize: 15, color: Colors.grey),
                     ),
                     InkWell(

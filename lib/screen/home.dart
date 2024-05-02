@@ -122,7 +122,10 @@ class _HomePageState extends State<HomePage> {
                               context,
                               PageTransition(
                                   type: PageTransitionType.rightToLeft,
-                                  child: const ItemPage()));
+                                  child: ItemPage(
+                                      productName: searchResults[index]
+                                              ["heading"]
+                                          .toUpperCase())));
                         },
                       );
                     })),

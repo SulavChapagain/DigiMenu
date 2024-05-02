@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ItemPage extends StatefulWidget {
-  const ItemPage({super.key});
+  final productName;
+
+  const ItemPage({super.key, required this.productName});
 
   @override
   State<ItemPage> createState() => _ItemPageState();
@@ -58,26 +60,17 @@ class _ItemPageState extends State<ItemPage> {
         child: Scaffold(
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
-        backgroundColor: Color.fromARGB(255, 4, 65, 100),
+        backgroundColor: const Color.fromARGB(255, 20, 111, 185),
         tooltip: 'Increment',
         onPressed: () {},
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
-        title: const Text(
-          "DigiMenu",
+        title: Text(
+          widget.productName,
           style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
         ),
-        actions: <Widget>[
-          Text(
-            smallSentence("The Tiffin Box Kawasoti prali"),
-            style: const TextStyle(fontSize: 20),
-          ),
-          const SizedBox(
-            width: 15,
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

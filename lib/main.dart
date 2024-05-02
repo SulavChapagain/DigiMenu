@@ -1,5 +1,5 @@
-// import 'package:digimenu/screen/login.dart';
-import 'package:digimenu/screen/nabpage.dart';
+import 'package:digimenu/screen/login.dart';
+// import 'package:digimenu/screen/nabpage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const HomeNabvar(),
+      home: const LoginPage(),
     );
   }
 }

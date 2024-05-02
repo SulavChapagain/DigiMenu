@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:digimenu/screen/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:page_transition/page_transition.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -20,12 +24,181 @@ class _SignUpPageState extends State<SignUpPage> {
   var click = 0;
 
   bool HidePassword = true;
+  bool load = false;
 
-  final int _start = 60;
-
+  int _remainingSeconds = 60;
   bool validation = false;
 
+  late Timer _timer;
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   void startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_remainingSeconds == 0) {
+          setState(() {
+            timer.cancel();
+            OTPSend = false;
+            click = 0;
+            _remainingSeconds = 90;
+          });
+        } else {
+          setState(() {
+            _remainingSeconds--;
+          });
+        }
+      },
+    );
+  }
+
+  Future<void> sendOTP() async {
+    if (email.text.isNotEmpty) {
+      String uri = "https://digitalmenu.finoedha.com/sigin.php";
+      try {
+        var response = await http.post(Uri.parse(uri), body: {
+          "getOTP": "true",
+          "email": email.text,
+        });
+
+        var res = jsonDecode(response.body);
+        if (res["sucess"] == "userfound") {
+          setState(() {
+            _remainingSeconds = 0;
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                content: Container(
+                    padding: EdgeInsets.all(16),
+                    height: 90,
+                    decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 16, 134, 36),
+                        borderRadius: BorderRadius.circular(20)),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.check_mark_circled,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Used email",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
+                              ),
+                              Text(
+                                "Already have an account",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          });
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  Future<void> createAccount() async {
+    setState(() {
+      load = true;
+    });
+    String uri = "https://digitalmenu.finoedha.com/sigin.php";
+    try {
+      var response = await http.post(Uri.parse(uri), body: {
+        "email": email.text,
+        "submitdata": "true",
+        "otpcodedata": otpcode.text,
+        "password": password.text,
+      });
+
+      var res = jsonDecode(response.body);
+      if (res["success"] == "false") {
+        setState(() {
+          load = false;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              content: Container(
+                  padding: EdgeInsets.all(16),
+                  height: 90,
+                  decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 134, 16, 16),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.bubble_right_fill,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Try again",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            Text(
+                              "Something went wrong!",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        });
+      } else {
+        setState(() {
+          email.text = "Done";
+          load = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        email.text = "error";
+        load = false;
+      });
+      print(e);
+    }
+  }
+
+  void getOTP() {
     if (email.text.isEmpty) {
       setState(() {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -70,6 +243,8 @@ class _SignUpPageState extends State<SignUpPage> {
         click = 0;
       });
     } else {
+      sendOTP();
+      startTimer();
       setState(() {
         OTPSend = true;
         colorname = Colors.grey;
@@ -97,7 +272,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        "FinoMenu",
+                        "DigiMenu",
                         style: TextStyle(
                             fontSize: 22, fontWeight: FontWeight.w700),
                       )
@@ -144,13 +319,13 @@ class _SignUpPageState extends State<SignUpPage> {
                           click++;
 
                           if (click == 1) {
-                            startTimer();
+                            getOTP();
                           } else {
                             Null;
                           }
                         },
                         child: Text(
-                          OTPSend ? "$_start" : "Get OTP",
+                          OTPSend ? "$_remainingSeconds" : "Get OTP",
                           style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: OTPSend ? colorname : Colors.blue),
@@ -192,11 +367,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 Padding(
                   padding: const EdgeInsets.only(left: 30, right: 30, top: 30),
                   child: InkWell(
-                    onTap: () async {
+                    onTap: () {
                       if (email.text.isNotEmpty ||
                           password.text.isNotEmpty ||
                           otpcode.text.isNotEmpty) {
-                        null;
+                        createAccount();
                       }
                     },
                     child: Container(
@@ -205,12 +380,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: Colors.black),
-                      child: const Center(
-                        child: Text(
-                          "Confirm",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w600),
-                        ),
+                      child: Center(
+                        child: load
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                "Confirm",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600),
+                              ),
                       ),
                     ),
                   ),
