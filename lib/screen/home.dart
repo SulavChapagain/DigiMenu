@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:api_cache_manager/api_cache_manager.dart';
 
 import 'package:digimenu/screen/items.dart';
 import 'package:flutter/material.dart';
@@ -24,15 +25,38 @@ class _HomePageState extends State<HomePage> {
   List foodHeading = [];
   List searchResults = [];
 
+  String userName = "";
+
+  bool isLoad = false;
+  bool isEmpty = false;
+
+  TextEditingController headingName = TextEditingController();
+
+  void casheData() async {
+    var username = await APICacheManager().getCacheData("UserName");
+
+    setState(() {
+      userName = username.syncData;
+    });
+  }
+
   Future<void> viewMenudata() async {
+    var userID = await APICacheManager().getCacheData("UserID");
+
     String uri =
-        "https://digitalmenu.finoedha.com/ViewProductHeading.php?id=1706112669";
+        "https://digitalmenu.finoedha.com/ViewProductHeading.php?id=${userID.syncData}";
     try {
       var response = await http.get(Uri.parse(uri));
 
       setState(() {
         foodHeading = jsonDecode(response.body);
         searchResults = foodHeading;
+
+        if (foodHeading.isEmpty) {
+          isEmpty = true;
+        } else {
+          isEmpty = false;
+        }
       });
     } catch (e) {
       print(e);
@@ -48,11 +72,106 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> addItem() async {
+    var userID = await APICacheManager().getCacheData("UserID");
+
+    try {
+      String uri = "https://digitalmenu.finoedha.com/createmenuheading.php";
+
+      var res = await http.post(Uri.parse(uri), body: {
+        "heading": headingName.text,
+        "userid": userID.syncData,
+      });
+
+      var response = jsonDecode(res.body);
+      if (response['success'] == 'true') {
+        viewMenudata();
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        setState(() {
+          headingName.text = "";
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> deleteItem(tableId) async {
+    try {
+      String uri = "https://digitalmenu.finoedha.com/delete.php";
+
+      var res = await http.post(Uri.parse(uri), body: {
+        "headingID": tableId,
+      });
+
+      var response = jsonDecode(res.body);
+      if (response['sucess'] == 'true') {
+        viewMenudata();
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        setState(() {
+          headingName.text = "";
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> updateItem(tableId) async {
+    try {
+      String uri = "https://digitalmenu.finoedha.com/update.php";
+
+      var res = await http.post(Uri.parse(uri), body: {
+        "HeadheadingID": tableId,
+        "productName": headingName.text,
+      });
+
+      var response = jsonDecode(res.body);
+      if (response['sucess'] == 'true') {
+        viewMenudata();
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        setState(() {
+          headingName.text = "";
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     viewMenudata();
+    casheData();
     super.initState();
   }
+
+  Future longpressBTN(tableId) => showDialog(
+      context: context,
+      builder: ((context) => AlertDialog(
+            title: const Text("Items"),
+            content: TextField(
+              controller: headingName,
+              decoration: const InputDecoration(hintText: "PIZZA"),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    deleteItem(tableId);
+                  },
+                  child: const Text(
+                    "Delete",
+                    style: TextStyle(color: Colors.red),
+                  )),
+              TextButton(
+                  onPressed: () {
+                    if (headingName.text.isNotEmpty) {
+                      updateItem(tableId);
+                    }
+                  },
+                  child: const Text("Update"))
+            ],
+          )));
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +180,26 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
         backgroundColor: const Color.fromARGB(255, 20, 111, 185),
-        tooltip: 'Increment',
-        onPressed: () {},
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: ((context) => AlertDialog(
+                    title: const Text("Items"),
+                    content: TextField(
+                      controller: headingName,
+                      decoration: const InputDecoration(hintText: "PIZZA"),
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            if (headingName.text.isNotEmpty) {
+                              addItem();
+                            }
+                          },
+                          child: const Text("Add"))
+                    ],
+                  )));
+        },
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       appBar: AppBar(
@@ -73,7 +210,7 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: <Widget>[
           Text(
-            smallSentence("The Tiffin Box Kawasoti prali"),
+            smallSentence(userName),
             style: const TextStyle(fontSize: 20),
           ),
           const SizedBox(
@@ -109,26 +246,47 @@ class _HomePageState extends State<HomePage> {
               height: 20,
             ),
             Expanded(
-                child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: searchResults.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title:
-                            Text(searchResults[index]["heading"].toUpperCase()),
-                        trailing: const Icon(Icons.arrow_right_outlined),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: ItemPage(
-                                      productName: searchResults[index]
-                                              ["heading"]
-                                          .toUpperCase())));
-                        },
-                      );
-                    })),
+                child: isLoad
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : isEmpty
+                        ? Image.asset(
+                            "assets/pictures/upLoad.png",
+                            width: 250,
+                          )
+                        : ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: searchResults.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(searchResults[index]["heading"]
+                                    .toUpperCase()),
+                                trailing:
+                                    const Icon(Icons.arrow_right_outlined),
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      PageTransition(
+                                          type: PageTransitionType.rightToLeft,
+                                          child: ItemPage(
+                                            productName: searchResults[index]
+                                                    ["heading"]
+                                                .toUpperCase(),
+                                            productTableTD: searchResults[index]
+                                                ["headingid"],
+                                          )));
+                                },
+                                onLongPress: () {
+                                  setState(() {
+                                    headingName.text =
+                                        searchResults[index]["heading"];
+                                  });
+                                  longpressBTN(
+                                      searchResults[index]["headingid"]);
+                                },
+                              );
+                            })),
           ],
         ),
       ),

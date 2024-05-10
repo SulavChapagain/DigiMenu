@@ -1,5 +1,11 @@
+import 'dart:convert';
+import 'package:api_cache_manager/api_cache_manager.dart';
+import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:digimenu/screen/SignUp.dart';
+import 'package:digimenu/screen/nabpage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:page_transition/page_transition.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,6 +18,88 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController userEmail = TextEditingController();
   TextEditingController userPassword = TextEditingController();
+
+  bool loadData = false;
+
+  Future<void> logindata() async {
+    try {
+      setState(() {
+        loadData = true;
+      });
+      String uri = "https://digitalmenu.finoedha.com/login.php";
+      var res = await http.post(Uri.parse(uri), body: {
+        "email": userEmail.text,
+        "password": userPassword.text,
+      });
+      var response = jsonDecode(res.body);
+      if (response['success'] == "true") {
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "UserName", syncData: "${response['userName']}"));
+        await APICacheManager().addCacheData(
+            APICacheDBModel(key: "UserID", syncData: response['userID']));
+        setState(() {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.rightToLeft,
+                  child: const HomeNabvar()));
+
+          loadData = false;
+        });
+      } else {
+        setState(() {
+          loadData = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              content: Container(
+                  padding: const EdgeInsets.all(16),
+                  height: 90,
+                  decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 253, 28, 28),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.chevron_left_slash_chevron_right,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Try again",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            Text(
+                              "Incorrect email or password",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      setState(() {
+        loadData = false;
+      });
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,19 +180,29 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.only(left: 30, right: 30, top: 30),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      if (userEmail.text.isNotEmpty ||
+                          userPassword.text.isNotEmpty) {
+                        logindata();
+                      }
+                    },
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: 60,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: Colors.black),
-                      child: const Center(
-                        child: Text(
-                          "Login",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w600),
-                        ),
+                      child: Center(
+                        child: loadData
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                "Login",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600),
+                              ),
                       ),
                     ),
                   ),

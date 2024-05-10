@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:api_cache_manager/utils/cache_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -41,7 +42,31 @@ void _openGoogleLink() async {
   }
 }
 
+String smallSentence(String bigSentence) {
+  if (bigSentence.length > 15) {
+    return '${bigSentence.substring(0, 10)}...';
+  } else {
+    return bigSentence;
+  }
+}
+
 class _AboutPageState extends State<AboutPage> {
+  String userName = "";
+
+  void casheData() async {
+    var username = await APICacheManager().getCacheData("UserName");
+
+    setState(() {
+      userName = username.syncData;
+    });
+  }
+
+  @override
+  void initState() {
+    casheData();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -62,18 +87,18 @@ class _AboutPageState extends State<AboutPage> {
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             onTap: () {},
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Tiffin Box",
+                  smallSentence(userName),
                   style: TextStyle(fontSize: 25),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
-                Icon(
+                const Icon(
                   CupertinoIcons.pencil,
                   size: 30,
                 )
