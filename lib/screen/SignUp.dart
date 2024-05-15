@@ -26,14 +26,14 @@ class _SignUpPageState extends State<SignUpPage> {
   bool HidePassword = true;
   bool load = false;
 
+  Timer? _timer;
+
   int _remainingSeconds = 60;
   bool validation = false;
 
-  late Timer _timer;
-
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 

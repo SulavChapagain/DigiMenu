@@ -202,8 +202,8 @@ class _ItemPageState extends State<ItemPage> {
                                     ? Text(smallSentence(
                                         searchResults[index]["detail"]))
                                     : null,
-                                onTap: () {
-                                  Navigator.push(
+                                onTap: () async {
+                                  var refresh = await Navigator.push(
                                       context,
                                       PageTransition(
                                           type: PageTransitionType.rightToLeft,
@@ -217,6 +217,10 @@ class _ItemPageState extends State<ItemPage> {
                                             itemTableId: searchResults[index]
                                                 ["id"],
                                           )));
+
+                                  if (refresh == "refresh") {
+                                    viewMenudata();
+                                  }
                                 },
                               );
                             })),

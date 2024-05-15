@@ -36,7 +36,7 @@ class _itemUpdateState extends State<itemUpdate> {
 
       var response = jsonDecode(res.body);
       if (response['sucess'] == 'true') {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop("refresh");
       }
     } catch (e) {
       print(e);
@@ -56,7 +56,7 @@ class _itemUpdateState extends State<itemUpdate> {
 
       var response = jsonDecode(res.body);
       if (response['sucess'] == 'true') {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop("refresh");
       }
     } catch (e) {
       print(e);

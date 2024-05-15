@@ -38,6 +38,8 @@ class _LoginPageState extends State<LoginPage> {
         await APICacheManager().addCacheData(
             APICacheDBModel(key: "UserID", syncData: response['userID']));
         setState(() {
+          userEmail.text = "";
+          userPassword.text = "";
           Navigator.push(
               context,
               PageTransition(
