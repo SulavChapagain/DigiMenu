@@ -1,13 +1,21 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'dart:ui';
+
 import 'package:api_cache_manager/utils/cache_manager.dart';
 import 'package:digimenu/elements/splashscreen.dart';
+import 'package:digimenu/screen/userdata.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -44,6 +52,18 @@ void _openGoogleLink() async {
   }
 }
 
+void _purchase() async {
+  var UserID = await APICacheManager().getCacheData("UserID");
+
+  String url =
+      'https://digitalmenu.finoedha.com/payment/payment.php?uid=${UserID.syncData}'; // Specify the URL you want to redirect to
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
+
 String smallSentence(String bigSentence) {
   if (bigSentence.length > 15) {
     return '${bigSentence.substring(0, 10)}...';
@@ -55,37 +75,61 @@ String smallSentence(String bigSentence) {
 class _AboutPageState extends State<AboutPage> {
   String userName = "";
   String userid = "";
+  bool userpurchase = false;
 
   GlobalKey globalKey = GlobalKey();
-  final _screenshotController = ScreenshotController();
-  Future<Image>? image;
 
   void casheData() async {
     var username = await APICacheManager().getCacheData("UserName");
     var userID = await APICacheManager().getCacheData("UserID");
+    var purchaseStatus = await APICacheManager().getCacheData("UserPurchase");
 
     setState(() {
       userName = username.syncData;
       userid = userID.syncData;
+      if (purchaseStatus.syncData != "Free") {
+        userpurchase = true;
+      } else {
+        userpurchase = false;
+      }
     });
   }
 
-  Future<String> get imagePath async {
-    final directory = (await getApplicationDocumentsDirectory()).path;
-    return '$directory/qr.png';
-  }
+  Future<void> _saveQRToGallery() async {
+    try {
+      RenderRepaintBoundary boundary =
+          globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 5.0);
 
-  Future<Image> _loadImage() async {
-    return await imagePath.then((imagePath) => Image.asset(imagePath));
-  }
+      //Drawing White Background because Qr Code is Black
+      final whitePaint = Paint()..color = Colors.white;
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder,
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()));
+      canvas.drawRect(
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+          whitePaint);
+      canvas.drawImage(image, Offset.zero, Paint());
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(image.width, image.height);
+      ByteData? byteData = await img.toByteData(format: ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-  Future<void> _captureAndSaveQRCode() async {
-    final imageDirectory = await imagePath;
-
-    _screenshotController.captureAndSave(imageDirectory);
-    setState(() {
-      image = _loadImage();
-    });
+      final result = await ImageGallerySaver.saveImage(pngBytes);
+      print(result);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('QR code saved to gallery!'),
+        ),
+      );
+    } catch (e) {
+      print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save QR code to gallery!'),
+        ),
+      );
+    }
   }
 
   Future displayBottomSheet(BuildContext context) {
@@ -96,42 +140,43 @@ class _AboutPageState extends State<AboutPage> {
             width: MediaQuery.of(context).size.width,
             child: SingleChildScrollView(
               child: Column(children: [
-                // const SizedBox(
-                //   height: 20,
-                // ),
-                // RepaintBoundary(
-                //   key: globalKey,
-                // child: QrImageView(
-                //   data: 'https://digitalmenu.finoedha.com/?id=$userid',
-                //   version: QrVersions.auto,
-                //   size: 200.0,
-                // ),
-                // ),
-                // const Text("View Menu"),
-                // const SizedBox(
-                //   height: 30,
-                // ),
-                // TextButton(
-                //     onPressed: () async {
-                //       await _captureAndSaveQRCode();
-                //     },
-                //     child: const Text("Download"))
-
+                const SizedBox(
+                  height: 20,
+                ),
+                RepaintBoundary(
+                  key: globalKey,
+                  child: Column(
+                    children: [
+                      QrImageView(
+                        data: 'https://digitalmenu.finoedha.com/?id=$userid',
+                        version: QrVersions.auto,
+                        size: 200.0,
+                        embeddedImage:
+                            const AssetImage('assets/pictures/Logo.png'),
+                        embeddedImageStyle: const QrEmbeddedImageStyle(
+                          size: Size(30, 30),
+                        ),
+                        errorStateBuilder: (ctx, err) {
+                          return const Center(
+                            child: Text(
+                              'Something went wrong!!!',
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        },
+                      ),
+                      const Text("View Menu"),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
                 TextButton(
-                    onPressed: () async {
-                      await _captureAndSaveQRCode();
+                    onPressed: () {
+                      _saveQRToGallery();
                     },
-                    child: const Text("capture qr code")),
-                if (image != null)
-                  Center(
-                      child: Screenshot(
-                    controller: _screenshotController,
-                    child: QrImageView(
-                      data: 'https://digitalmenu.finoedha.com/?id=$userid',
-                      version: QrVersions.auto,
-                      size: 200.0,
-                    ),
-                  )),
+                    child: const Text("Download"))
               ]),
             ))));
   }
@@ -161,14 +206,20 @@ class _AboutPageState extends State<AboutPage> {
           InkWell(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.rightToLeft,
+                      child: const userData()));
+            },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   smallSentence(userName),
-                  style: TextStyle(fontSize: 25),
+                  style: const TextStyle(fontSize: 25),
                 ),
                 const SizedBox(
                   width: 5,
@@ -180,8 +231,8 @@ class _AboutPageState extends State<AboutPage> {
               ],
             ),
           ),
-          const Text("Status: Free"),
-          const Text("Time Left: 5m"),
+          userpurchase ? const Text("Status: Pro") : const Text("Status: Free"),
+          if (userpurchase) const Text("Time Left: 5m"),
           const SizedBox(
             height: 40,
           ),
@@ -200,12 +251,20 @@ class _AboutPageState extends State<AboutPage> {
           ListTile(
             title: const Text("Analytics"),
             trailing: const Icon(Icons.lock),
-            onTap: () {},
+            onTap: () {
+              // Navigator.push(
+              //     context,
+              //     PageTransition(
+              //         type: PageTransitionType.rightToLeft,
+              //         child: ));
+            },
           ),
-          ListTile(
-            title: const Text("Purchase"),
-            onTap: () {},
-          ),
+          // ListTile(
+          //   title: const Text("Purchase"),
+          //   onTap: () {
+          //     _purchase();
+          //   },
+          // ),
           ListTile(
             title: const Text("Contact us"),
             onTap: () {
@@ -218,6 +277,7 @@ class _AboutPageState extends State<AboutPage> {
               style: TextStyle(color: Colors.red),
             ),
             onTap: () async {
+              await APICacheManager().deleteCache("UserNumber");
               var UserID = await APICacheManager().deleteCache("UserID");
               if (UserID) {
                 Navigator.of(context, rootNavigator: true).pushReplacement(

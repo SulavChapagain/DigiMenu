@@ -1,4 +1,4 @@
-package com.example.digimenu
+package com.digimenu.finoedha
 
 import io.flutter.embedding.android.FlutterActivity
 

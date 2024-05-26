@@ -16,8 +16,8 @@ class _HomeNabvarState extends State<HomeNabvar> {
     return CupertinoTabScaffold(
         tabBar: CupertinoTabBar(items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.text_justify), label: "Templates"),
+          // BottomNavigationBarItem(
+          //     icon: Icon(CupertinoIcons.text_justify), label: "Templates"),
           BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.profile_circled), label: "About"),
         ]),
@@ -30,7 +30,7 @@ class _HomeNabvarState extends State<HomeNabvar> {
                 },
               );
 
-            case 2:
+            case 1:
               return CupertinoTabView(
                 builder: (context) {
                   return const CupertinoPageScaffold(child: AboutPage());

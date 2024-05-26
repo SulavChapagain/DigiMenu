@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:api_cache_manager/api_cache_manager.dart';
 import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:digimenu/screen/SignUp.dart';
+import 'package:digimenu/screen/changepassword.dart';
 import 'package:digimenu/screen/nabpage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +36,12 @@ class _LoginPageState extends State<LoginPage> {
       if (response['success'] == "true") {
         await APICacheManager().addCacheData(APICacheDBModel(
             key: "UserName", syncData: "${response['userName']}"));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "UserNumber", syncData: "${response['userNumber']}"));
         await APICacheManager().addCacheData(
             APICacheDBModel(key: "UserID", syncData: response['userID']));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "UserPurchase", syncData: response['userPurchase']));
         setState(() {
           userEmail.text = "";
           userPassword.text = "";
@@ -169,7 +174,13 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: const Changepassword()));
+                        },
                         child: const Text(
                           "Rest Password",
                           style: TextStyle(

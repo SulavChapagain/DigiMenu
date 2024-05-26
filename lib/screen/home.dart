@@ -1,10 +1,15 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'package:api_cache_manager/api_cache_manager.dart';
+import 'package:api_cache_manager/models/cache_db_model.dart';
 
 import 'package:digimenu/screen/items.dart';
+import 'package:digimenu/screen/userdata.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:page_transition/page_transition.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,10 +39,37 @@ class _HomePageState extends State<HomePage> {
 
   void casheData() async {
     var username = await APICacheManager().getCacheData("UserName");
+    if (username.syncData.isEmpty) {
+      var refresh = await Navigator.push(
+          context,
+          PageTransition(
+              type: PageTransitionType.rightToLeft, child: const userData()));
+
+      if (refresh == "refresh") {
+        casheData();
+      }
+    }
 
     setState(() {
       userName = username.syncData;
     });
+  }
+
+  Future<void> checkUpdate() async {
+    String uri = "https://digitalmenu.finoedha.com/appversion.php";
+    try {
+      var response = await http.get(Uri.parse(uri));
+
+      var res = jsonDecode(response.body);
+
+      var APPVersion = "1";
+
+      if (res[0]['appversion'] != APPVersion) {
+        UpdateMyApp();
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> viewMenudata() async {
@@ -143,8 +175,35 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     viewMenudata();
     casheData();
+    checkUpdate();
     super.initState();
   }
+
+  void _purchase() async {
+    String url =
+        'https://play.google.com/store/apps/details?id=com.digimenu.finoedha'; // Specify the URL you want to redirect to
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Future<void> UpdateMyApp() => showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: ((context) => AlertDialog(
+            title: const Text("Update"),
+            content: const Text("Update your DigiMenu App"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    _purchase();
+                  },
+                  child: const Text("Update"))
+            ],
+          )));
 
   Future longpressBTN(tableId) => showDialog(
       context: context,

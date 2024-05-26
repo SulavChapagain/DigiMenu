@@ -2,20 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:digimenu/screen/login.dart';
-import 'package:digimenu/screen/userdata.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:page_transition/page_transition.dart';
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class Changepassword extends StatefulWidget {
+  const Changepassword({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<Changepassword> createState() => _ChangepasswordState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _ChangepasswordState extends State<Changepassword> {
   bool OTPSend = false;
   Color colorname = Colors.grey;
   final email = TextEditingController();
@@ -61,7 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<void> sendOTP() async {
     if (email.text.isNotEmpty) {
-      String uri = "https://digitalmenu.finoedha.com/sigin.php";
+      String uri = "https://digitalmenu.finoedha.com/updateprofile.php";
       try {
         var response = await http.post(Uri.parse(uri), body: {
           "getOTP": "true",
@@ -86,7 +85,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: const Row(
                       children: [
                         Icon(
-                          CupertinoIcons.check_mark_circled,
+                          CupertinoIcons.exclamationmark,
                           color: Colors.white,
                           size: 30,
                         ),
@@ -98,12 +97,12 @@ class _SignUpPageState extends State<SignUpPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Used email",
+                                "User not found",
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 18),
                               ),
                               Text(
-                                "Already have an account",
+                                "This email is not used",
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 12),
                               ),
@@ -127,7 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() {
       load = true;
     });
-    String uri = "https://digitalmenu.finoedha.com/sigin.php";
+    String uri = "https://digitalmenu.finoedha.com/updateprofile.php";
     try {
       var response = await http.post(Uri.parse(uri), body: {
         "email": email.text,
@@ -214,7 +213,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                           Text(
-                            "Id succesfully created",
+                            "Password changed succesfully",
                             style: TextStyle(color: Colors.white, fontSize: 12),
                           ),
                         ],
@@ -330,7 +329,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        "Digitized your business",
+                        "Change your password",
                         style: TextStyle(fontSize: 15, color: Colors.grey),
                       )
                     ],
@@ -381,7 +380,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 inputbox(
                   hintText: "Create Password",
-                  label: "Password",
+                  label: "New Password",
                   obscureText: HidePassword,
                   controller: password,
                 ),
@@ -431,7 +430,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 color: Colors.white,
                               )
                             : const Text(
-                                "Confirm",
+                                "Change",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600),
@@ -442,29 +441,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(
                   height: 30,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Already have an account?",
-                      style: TextStyle(fontSize: 15, color: Colors.grey),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.rightToLeft,
-                                child: const LoginPage()));
-                      },
-                      child: const Text(
-                        " Login",
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.w800),
-                      ),
-                    )
-                  ],
                 ),
               ],
             ),
