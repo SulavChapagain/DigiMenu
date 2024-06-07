@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'package:api_cache_manager/api_cache_manager.dart';
-import 'package:api_cache_manager/models/cache_db_model.dart';
 
 import 'package:digimenu/screen/items.dart';
 import 'package:digimenu/screen/userdata.dart';
@@ -39,7 +38,8 @@ class _HomePageState extends State<HomePage> {
 
   void casheData() async {
     var username = await APICacheManager().getCacheData("UserName");
-    if (username.syncData.isEmpty) {
+    var myCurrency = await APICacheManager().getCacheData("myCurrency");
+    if (username.syncData.isEmpty || myCurrency.syncData.isEmpty) {
       var refresh = await Navigator.push(
           context,
           PageTransition(
@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
 
       var res = jsonDecode(response.body);
 
-      var APPVersion = "1";
+      var APPVersion = "2";
 
       if (res[0]['appversion'] != APPVersion) {
         UpdateMyApp();

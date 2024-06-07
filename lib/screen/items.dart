@@ -191,7 +191,7 @@ class _ItemPageState extends State<ItemPage> {
                             width: 250,
                           )
                         : ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
+                            // physics: const AlwaysScrollableScrollPhysics(),
                             itemCount: searchResults.length,
                             itemBuilder: (context, index) {
                               return ListTile(

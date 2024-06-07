@@ -39,9 +39,21 @@ class _LoginPageState extends State<LoginPage> {
         await APICacheManager().addCacheData(APICacheDBModel(
             key: "UserNumber", syncData: "${response['userNumber']}"));
         await APICacheManager().addCacheData(
-            APICacheDBModel(key: "UserID", syncData: response['userID']));
+            APICacheDBModel(key: "UserID", syncData: "${response['userID']}"));
         await APICacheManager().addCacheData(APICacheDBModel(
-            key: "UserPurchase", syncData: response['userPurchase']));
+            key: "UserPurchase", syncData: "${response['userPurchase']}"));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "UserCountry", syncData: "${response['usercountry']}"));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "UserLogo", syncData: "${response['userLogo']}"));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "myCurrencysymbole", syncData: "${response['userCurrency']}"));
+
+        if (APICacheManager().isAPICacheKeyExist("myCurrencysymbole") ==
+            false) {
+          await APICacheManager()
+              .addCacheData(APICacheDBModel(key: "myCurrency", syncData: ""));
+        }
         setState(() {
           userEmail.text = "";
           userPassword.text = "";
@@ -87,6 +99,53 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             Text(
                               "Incorrect email or password",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        });
+      }
+      if (response['success'] == "NotVerify") {
+        setState(() {
+          loadData = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              content: Container(
+                  padding: const EdgeInsets.all(16),
+                  height: 90,
+                  decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 253, 28, 28),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.chevron_left_slash_chevron_right,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Non Verified",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            Text(
+                              "Your email is not verified",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 12),
                             ),
