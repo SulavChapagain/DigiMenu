@@ -24,6 +24,7 @@ class _userDataState extends State<userData> {
   String myCurrency = "";
   String myCurrencysymbole = "";
   String isLogoSelected = "";
+  bool userpurchase = true;
 
   bool isload = false;
 
@@ -149,8 +150,33 @@ class _userDataState extends State<userData> {
     }
   }
 
+  // Future<void> purchasestatus() async {
+  //   var UserID = await APICacheManager().getCacheData("UserID");
+
+  //   String uri =
+  //       "https://digitalmenu.finoedha.com/MenuAnalytics.php?id=${UserID.syncData}";
+  //   try {
+  //     var response = await http.get(Uri.parse(uri));
+
+  //     var userPurchaseData = jsonDecode(response.body);
+
+  //     if (userPurchaseData['purchaseData'] != "Free") {
+  //       setState(() {
+  //         userpurchase = true;
+  //       });
+  //     } else {
+  //       setState(() {
+  //         userpurchase = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
+
   @override
   void initState() {
+    // purchasestatus();
     localdata();
     super.initState();
   }
@@ -244,7 +270,7 @@ class _userDataState extends State<userData> {
                   },
                 );
               },
-              child: myCurrency.isEmpty
+              child: myCurrencysymbole.isEmpty
                   ? const Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -264,7 +290,7 @@ class _userDataState extends State<userData> {
                         TextButton(
                             onPressed: () {
                               setState(() {
-                                myCurrency = "";
+                                myCurrencysymbole = "";
                               });
                             },
                             child: const Text("Change"))
@@ -273,15 +299,22 @@ class _userDataState extends State<userData> {
             ),
             TextButton(
               onPressed: () {
-                getImage();
+                if (userpurchase) {
+                  getImage();
+                }
               },
               child: isLogoSelected.isEmpty || isLogoSelected == "null"
-                  ? const Row(
+                  ? Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Upload Logo',
                         ),
+                        userpurchase
+                            ? const Text(
+                                '',
+                              )
+                            : Icon(Icons.lock),
                       ],
                     )
                   : Row(

@@ -38,8 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   void casheData() async {
     var username = await APICacheManager().getCacheData("UserName");
-    var myCurrency = await APICacheManager().getCacheData("myCurrency");
-    if (username.syncData.isEmpty || myCurrency.syncData.isEmpty) {
+    if (username.syncData.isEmpty) {
       var refresh = await Navigator.push(
           context,
           PageTransition(
@@ -62,7 +61,7 @@ class _HomePageState extends State<HomePage> {
 
       var res = jsonDecode(response.body);
 
-      var APPVersion = "2";
+      var APPVersion = "3";
 
       if (res[0]['appversion'] != APPVersion) {
         UpdateMyApp();

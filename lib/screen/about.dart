@@ -1,15 +1,18 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
+import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:api_cache_manager/utils/cache_manager.dart';
 import 'package:digimenu/elements/splashscreen.dart';
 import 'package:digimenu/screen/userdata.dart';
 
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:page_transition/page_transition.dart';
@@ -75,23 +78,26 @@ String smallSentence(String bigSentence) {
 class _AboutPageState extends State<AboutPage> {
   String userName = "";
   String userid = "";
+
+  String totalDay = "";
   bool userpurchase = false;
+  List purchasedata = [];
 
   GlobalKey globalKey = GlobalKey();
 
   void casheData() async {
     var username = await APICacheManager().getCacheData("UserName");
     var userID = await APICacheManager().getCacheData("UserID");
-    var purchaseStatus = await APICacheManager().getCacheData("UserPurchase");
+    // var purchaseStatus = await APICacheManager().getCacheData("UserPurchase");
 
     setState(() {
       userName = username.syncData;
       userid = userID.syncData;
-      if (purchaseStatus.syncData != "Free") {
-        userpurchase = true;
-      } else {
-        userpurchase = false;
-      }
+      // if (purchaseStatus.syncData != "Free") {
+      //   userpurchase = true;
+      // } else {
+      //   userpurchase = false;
+      // }
     });
   }
 
@@ -181,9 +187,35 @@ class _AboutPageState extends State<AboutPage> {
             ))));
   }
 
+  // Future<void> purchasestatus() async {
+  //   var UserID = await APICacheManager().getCacheData("UserID");
+
+  //   String uri =
+  //       "https://digitalmenu.finoedha.com/MenuAnalytics.php?id=${UserID.syncData}";
+  //   try {
+  //     var response = await http.get(Uri.parse(uri));
+
+  //     var userPurchaseData = jsonDecode(response.body);
+
+  //     if (userPurchaseData['purchaseData'] != "Free") {
+  //       setState(() {
+  //         userpurchase = true;
+  //         totalDay = userPurchaseData['totalDayLeft'].toString();
+  //       });
+  //     } else {
+  //       setState(() {
+  //         userpurchase = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
+
   @override
   void initState() {
     casheData();
+    // purchasestatus();
     super.initState();
   }
 
@@ -231,8 +263,8 @@ class _AboutPageState extends State<AboutPage> {
               ],
             ),
           ),
-          userpurchase ? const Text("Status: Pro") : const Text("Status: Free"),
-          if (userpurchase) const Text("Time Left: 5m"),
+           const Text("Status: Pro"),
+          
           const SizedBox(
             height: 40,
           ),
@@ -248,17 +280,17 @@ class _AboutPageState extends State<AboutPage> {
               displayBottomSheet(context);
             },
           ),
-          ListTile(
-            title: const Text("Analytics"),
-            trailing: const Icon(Icons.lock),
-            onTap: () {
-              // Navigator.push(
-              //     context,
-              //     PageTransition(
-              //         type: PageTransitionType.rightToLeft,
-              //         child: ));
-            },
-          ),
+          // ListTile(
+          //   title: const Text("Analytics"),
+          //   trailing: const Icon(Icons.lock),
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         PageTransition(
+          //             type: PageTransitionType.rightToLeft,
+          //             child: ));
+          //   },
+          // ),
           // ListTile(
           //   title: const Text("Purchase"),
           //   onTap: () {

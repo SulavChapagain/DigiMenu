@@ -48,12 +48,11 @@ class _LoginPageState extends State<LoginPage> {
             key: "UserLogo", syncData: "${response['userLogo']}"));
         await APICacheManager().addCacheData(APICacheDBModel(
             key: "myCurrencysymbole", syncData: "${response['userCurrency']}"));
+        await APICacheManager()
+            .addCacheData(APICacheDBModel(key: "myCurrency", syncData: ""));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "defaultTheme", syncData: "${response['usertheme']}"));
 
-        if (APICacheManager().isAPICacheKeyExist("myCurrencysymbole") ==
-            false) {
-          await APICacheManager()
-              .addCacheData(APICacheDBModel(key: "myCurrency", syncData: ""));
-        }
         setState(() {
           userEmail.text = "";
           userPassword.text = "";
