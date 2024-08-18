@@ -1,6 +1,7 @@
 import 'package:digimenu/screen/about.dart';
 import 'package:digimenu/screen/home.dart';
 import 'package:digimenu/screen/template.dart';
+import 'package:digimenu/screen/uploadmenu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,8 @@ class _HomeNabvarState extends State<HomeNabvar> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.text_justify), label: "Templates"),
+          BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.camera), label: "Camera"),
           BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.profile_circled), label: "About"),
         ]),
@@ -40,9 +43,17 @@ class _HomeNabvarState extends State<HomeNabvar> {
             case 2:
               return CupertinoTabView(
                 builder: (context) {
+                  return const CupertinoPageScaffold(child: UploadMenu());
+                },
+              );
+
+            case 3:
+              return CupertinoTabView(
+                builder: (context) {
                   return const CupertinoPageScaffold(child: AboutPage());
                 },
               );
+
           }
           return Container();
         });

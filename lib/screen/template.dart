@@ -24,6 +24,7 @@ class _TemplatePageState extends State<TemplatePage> {
     var UserID = await APICacheManager().getCacheData("UserID");
 
     setState(() {
+      loadData = true;
       defaultTheme = usertheme.syncData;
       userID = UserID.syncData;
     });
@@ -134,11 +135,7 @@ class _TemplatePageState extends State<TemplatePage> {
                             borderRadius: BorderRadius.circular(10),
                             color: Colors.black),
                         child: Center(
-                            child: loadData
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                : defaultTheme == themeid
+                            child: defaultTheme == themeid
                                     ? const Text(
                                         "Selected",
                                         style: TextStyle(
@@ -187,51 +184,56 @@ class _TemplatePageState extends State<TemplatePage> {
           children: [
             const Padding(
               padding: EdgeInsets.only(bottom: 10),
-              child: Text("Background"),
+              child: Text("Backgrounds"),
             ),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10),
+              child: Container(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10),
+                
+                  itemCount: tempData.length, // total number of items
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        displayBottomSheet(context, tempData[index]['image'],
+                            tempData[index]['Name'], tempData[index]['tem_id']);
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 1,
+                                  blurRadius: 5,
+                                  offset:
+                                      Offset(0, 3), // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(20), // Image border
+                              child: Image.network(
+                                tempData[index]['image'],
+                                fit: BoxFit.cover,
+                                width: 110,
+                                height: 110,
 
-                itemCount: tempData.length, // total number of items
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () {
-                      displayBottomSheet(context, tempData[index]['image'],
-                          tempData[index]['Name'], tempData[index]['tem_id']);
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 1,
-                                blurRadius: 5,
-                                offset:
-                                    Offset(0, 3), // changes position of shadow
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(20), // Image border
-                            child: Image.network(
-                              tempData[index]['image'],
-                              fit: BoxFit.cover,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             )
           ],

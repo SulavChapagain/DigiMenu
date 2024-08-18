@@ -60,7 +60,6 @@ class _HomePageState extends State<HomePage> {
       var response = await http.get(Uri.parse(uri));
 
       var res = jsonDecode(response.body);
-
       var APPVersion = "3";
 
       if (res[0]['appversion'] != APPVersion) {

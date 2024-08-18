@@ -10,6 +10,7 @@ class ItemPage extends StatefulWidget {
   final productName;
   final productTableTD;
 
+
   const ItemPage(
       {super.key, required this.productName, required this.productTableTD});
 
@@ -29,6 +30,9 @@ class _ItemPageState extends State<ItemPage> {
   List foodHeading = [];
   List searchResults = [];
 
+  String usercurrency = "";
+
+
   bool isLoad = false;
   bool isEmpty = false;
 
@@ -36,10 +40,13 @@ class _ItemPageState extends State<ItemPage> {
   TextEditingController itemPrice = TextEditingController();
 
   Future<void> viewMenudata() async {
+    var userID = await APICacheManager().getCacheData("UserID");
+    var userCurrency = await APICacheManager().getCacheData("myCurrencysymbole");
+
     setState(() {
       isLoad = true;
+      usercurrency = userCurrency.syncData;
     });
-    var userID = await APICacheManager().getCacheData("UserID");
 
     String uri =
         "https://digitalmenu.finoedha.com/menuitem.php?userid=${userID.syncData}&tableId=${widget.productTableTD}";
@@ -197,7 +204,7 @@ class _ItemPageState extends State<ItemPage> {
                               return ListTile(
                                 title: Text(searchResults[index]["title"]),
                                 trailing: Text(
-                                    "Rs. ${searchResults[index]["price"]}"),
+                                    "$usercurrency ${searchResults[index]["price"]}"),
                                 subtitle: searchResults[index]["detail"] != ""
                                     ? Text(smallSentence(
                                         searchResults[index]["detail"]))
