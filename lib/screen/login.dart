@@ -52,6 +52,8 @@ class _LoginPageState extends State<LoginPage> {
             .addCacheData(APICacheDBModel(key: "myCurrency", syncData: ""));
         await APICacheManager().addCacheData(APICacheDBModel(
             key: "defaultTheme", syncData: "${response['usertheme']}"));
+        await APICacheManager().addCacheData(APICacheDBModel(
+            key: "switchdata", syncData: "${response['switchData']}"));
 
         setState(() {
           userEmail.text = "";

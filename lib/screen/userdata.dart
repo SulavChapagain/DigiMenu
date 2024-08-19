@@ -58,6 +58,8 @@ class _userDataState extends State<userData> {
         await APICacheManager().addCacheData(APICacheDBModel(
             key: "myCurrencysymbole", syncData: myCurrencysymbole));
 
+            
+
         setState(() {
           isload = false;
         });

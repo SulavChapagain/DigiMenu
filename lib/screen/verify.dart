@@ -154,7 +154,7 @@ class _VerifyCodeState extends State<VerifyCode> {
               "Verification code",
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 25),
             ),
-            const Text("We have verification code to"),
+            const Text("Send verification code to"),
             const SizedBox(
               height: 10,
             ),

@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
@@ -212,9 +211,56 @@ class _AboutPageState extends State<AboutPage> {
   //   }
   // }
 
+  bool _switch = false;
+  String switchdata = "";
+
+  void userCheck() async {
+      var switchcashdata = await APICacheManager().getCacheData("switchdata");
+      setState(() {
+        if (switchcashdata.syncData == "true") {
+          setState(() {
+            _switch = true;
+          });
+        } else {
+          setState(() {
+            _switch = false;
+          });
+        }
+      });
+    
+  }
+
+  Future<void> updateMenu() async {
+    if (_switch == true) {
+      setState(() {
+        switchdata = "true";
+      });
+      await APICacheManager()
+          .addCacheData(APICacheDBModel(key: "switchdata", syncData: "true"));
+    } else {
+      setState(() {
+        switchdata = "false";
+      });
+      await APICacheManager()
+          .addCacheData(APICacheDBModel(key: "switchdata", syncData: "false"));
+    }
+
+    try {
+      String uri = "https://digitalmenu.finoedha.com/uploadmenu/deletemenu.php";
+
+      await http.post(Uri.parse(uri), body: {
+        "userID": userid,
+        "isphoto": switchdata,
+      });
+    } catch (e) {
+      print("Error");
+    }
+  }
+
   @override
   void initState() {
     casheData();
+    userCheck();
     // purchasestatus();
     super.initState();
   }
@@ -263,11 +309,21 @@ class _AboutPageState extends State<AboutPage> {
               ],
             ),
           ),
-           const Text("Status: Pro"),
-          
+          const Text("Status: Pro"),
+
           const SizedBox(
             height: 40,
           ),
+
+          SwitchListTile(
+              title: const Text("Photo Menu"),
+              value: _switch,
+              onChanged: (bool value) {
+                setState(() {
+                  _switch = value;
+                  updateMenu();
+                });
+              }),
           ListTile(
             title: const Text("View Menu"),
             onTap: () {
